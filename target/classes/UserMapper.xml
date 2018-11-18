@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.itcast.dao.UserMapper">
+    
+    <resultMap id="userMap" type="User" autoMapping="true">
+        <id column="id" property="id"></id>
+    </resultMap>
+
+    <select id="queryUserListByIds" resultType="User">
+        select <include refid="CommonSql.commonSql"></include> from tb_user where id IN
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+
+    </select>
+    <update id="updateUserSelective" parameterType="User">
+        update tb_user
+          <set>
+             <if test="userName!=null and userName.trim()!=''">`user_name` = #{userName},</if>
+              <if test="password!=null and password.trim()!=''">`password` = #{password},</if>
+              <if test="name!=null and name.trim()!=''">`name` = #{name},</if>
+              <if test="age!=null">`age` = #{age},</if>
+              <if test="sex!=null">`sex` = #{sex}</if>
+          </set>
+          WHERE
+              (`id` = #{id});
+    </update>
+
+    <select id="queryUserListlikeUsernameAndAge" resultType="User">
+        select * from tb_user
+        <where>
+            <if test="username!=null and username.trim()!=''"> and user_name like "%"#{username}"%"</if>
+            <if test="age !=0">and age=#{age}</if>
+        </where>
+    </select>
+    
+    <select id="queryUserListLikeQueryNameOrAge" resultType="User">
+        select * from tb_user where sex=1
+        <choose>
+            <when test="userName!=null and userName.trim()!=''">
+                and user_name like '%' #{userName} '%'</when >
+            <when test="age !=null"> and age=#{age} </when>
+            <otherwise> and user_name='zhangsan'</otherwise>
+        </choose>
+    </select>
+
+    <select id="queryUserListLikeUserName" resultType="User">
+        select * from tb_user where sex = 1
+        <if test="userName!=null and userName.trim()!=''">
+             and user_name like '%' #{userName} '%'
+        </if>
+    </select>
+
+    <select id="queryUserByLikeUsername" resultType="User">
+        select <include refid="CommonSql.commonSql"></include> from tb_user where user_name like "%"#{username}"%";
+    </select>
+
+    <select id="loginUp" resultType="User">
+         select * from tb_user WHERE user_name =#{username} and password =#{password} ;
+    </select>
+
+    <select id="queryUserByUsernameAndPassword" resultType="User">
+        select * from tb_user WHERE user_name ='${username}' &amp;&amp; password ='${password}' ;
+    </select>
+
+    <select id="queryUserByTableName" resultType="User">
+        SELECT * from ${tableName}
+    </select>
+
+    <select id="queryUserById" resultMap="userMap">
+        select *  from tb_user where id = #{id}
+    </select>
+    <!--<select id="queryUserById" resultType="user">-->
+        <!--select *  from tb_user where id = #{id}-->
+    <!--</select>-->
+
+    <select id="queryUserAll" resultType="user">
+        select *  from tb_user where id <![CDATA[>]]> 4;
+    </select>
+
+    <insert id="save" parameterType="user">
+        INSERT INTO tb_user (
+        `user_name`,
+        `password`,
+        `name`,
+        `age`,
+        `sex`,
+        `birthday`,
+        `created`,
+        `updated`
+        )
+        VALUES
+        (
+        #{userName},
+        #{password},
+        #{name},
+        #{age},
+        #{sex},
+        #{birthday},
+        NOW(),
+        NOW()
+        );
+    </insert>
+
+    <update id="update" parameterType="user">
+        UPDATE tb_user
+        SET
+        user_name = #{userName},
+        password = #{password},
+        name = #{name},
+        age = #{age},
+        sex = #{sex},
+        birthday = #{birthday},
+        updated = NOW()
+
+        WHERE
+        (`id` = #{id});
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        delete from tb_user where id=#{id}
+    </delete>
+</mapper>
